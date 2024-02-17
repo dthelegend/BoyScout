@@ -3,6 +3,7 @@ import numpy as np
 from time import sleep as zzz
 from triangle import trianglesShareASide, lineAngle
 import math
+from alphabet import getLetter
 
 # initialize the camera 
 # If you have multiple camera connected with  
@@ -170,8 +171,8 @@ def go():
                 else:
                     angle = 270 + base
             angle -= 135
-            angle = fixAngle(angle)
-            cv2.putText(redim, f"L: {angle}d", (30, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255,0, 20), 2)
+            langle = fixAngle(angle)
+            cv2.putText(redim, f"L: {langle}d", (30, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255,0, 20), 2)
 
             #RIGHT
             p1, p2 = flagCen[1]    
@@ -188,16 +189,21 @@ def go():
                 else:
                     angle = 270 + base
             angle -= 225
-            angle = fixAngle(angle)
-            cv2.putText(redim, f"R: {angle}d", (30, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 20), 2)
+            rangle = fixAngle(angle)
+            cv2.putText(redim, f"R: {rangle}d", (30, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 20), 2)
+            
+            cv2.rectangle(redim, (430, 0), (520, 160), (255, 255, 255), -1)
+            cv2.putText(redim, getLetter(rangle, langle), (430, 120), cv2.FONT_HERSHEY_SIMPLEX, 4, (0, 0, 0), 4)
 
 
             p1, p2 = flagCen[1]
+
         for (p1,p2) in flagCen:
             cv2.circle(redim, (p1), 3, (0, 255, 0), -1)
             cv2.circle(redim, (p2), 3, (0, 255, 0), -1)
             cv2.line(redim, p1, p2, (120, 50, 80), 2)
         
+
         cv2.imshow("conts", redim)
 
         #printDis(redCen, yelCen, redim)
@@ -209,6 +215,95 @@ def go():
     # If captured image is corrupted, moving to else part 
     else: 
         print("No image detected. Please! try again")
+
+def letter():
+
+    # reading the input using the camera 
+    result, image = cam.read() 
+    
+    # If image will detected without any error,  
+    # show result 
+    if result: 
+
+        # Yellow Thresh
+        yel_con = yellow(image)
+        red_con = red(image)
+        
+        red_con_new = []
+        for contour in red_con:
+
+            # Approximate the contour
+            epsilon = 0.04 * cv2.arcLength(contour, True)
+            approx = cv2.approxPolyDP(contour, epsilon, True)
+            if len(approx) == 3 and cv2.contourArea(contour) > 80:
+                red_con_new.append(approx)
+        
+        yel_con_new = []
+        for contour in yel_con:
+
+            # Approximate the contour
+            epsilon = 0.04 * cv2.arcLength(contour, True)
+            approx = cv2.approxPolyDP(contour, epsilon, True)
+            if len(approx) == 3 and cv2.contourArea(contour) > 80:
+                yel_con_new.append(approx)
+
+        flags = []
+        for yt in yel_con_new:
+            ypoints = np.vstack(yt).squeeze()
+            for rt in red_con_new: 
+                rpoints = np.vstack(rt).squeeze()
+
+                if trianglesShareASide(ypoints, rpoints):
+                    flags.append((yt, rt))
+                    break 
+
+        
+
+        #Get all centroids
+        flagCen = [(centroid(x[0]), centroid(x[1])) for x in flags]
+
+        flagCen.sort(key=lambda x: x[0])
+
+        if len(flagCen) == 2:
+            #LEFT
+            p1, p2 = flagCen[0]          
+            gradient = (p1[1]-p2[1])/(p1[0]-p2[0]+0.00001)
+            base = math.degrees(math.atan(gradient))
+            if p1[1] < p2[1]:  # YELLOW ABOVE
+                if gradient < 0:
+                    angle = 270 + base
+                else:
+                    angle = 90 + base
+            else: # YELLOW BELOW
+                if gradient < 0:
+                    angle = 90 + base
+                else:
+                    angle = 270 + base
+            angle -= 135
+            langle = fixAngle(angle)
+
+            #RIGHT
+            p1, p2 = flagCen[1]    
+            gradient = (p2[1]-p1[1])/(p2[0]-p1[0]+0.00001)
+            base = math.degrees(math.atan(gradient))
+            if p1[1] < p2[1]:  # YELLOW ABOVE
+                if gradient < 0:
+                    angle = 270 + base
+                else:
+                    angle = 90 + base
+            else: # YELLOW BELOW
+                if gradient < 0:
+                    angle = 90 + base
+                else:
+                    angle = 270 + base
+            angle -= 225
+            rangle = fixAngle(angle)
+
+            return getLetter(rangle, langle)
+        return "-"
+    else: 
+        print("No image detected. Please! try again")
+        return "-"
 
 while True:
     go()
