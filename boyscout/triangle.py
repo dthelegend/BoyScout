@@ -28,11 +28,16 @@ def trianglesShareASide(points1, points2):
     for (ax, ay) in points1:
         diff = 999
         for (bx, by) in points2:
-            dis = ((ax - bx)**2 + (ay-by)**2)**0.5
+            dis = ((ax - bx)**2 + (ay - by)**2)**0.5
             if dis < diff:
                 diff = dis
+
         diffs.append(diff)
 
-    fil = list(filter(lambda x: x < 100, diffs))
+    fil = list(filter(lambda x: x < 30, diffs))
     
     return len(fil) == 2
+
+def lineAngle(gradient):
+    d = math.degrees(math.atan(gradient))
+    return d 
