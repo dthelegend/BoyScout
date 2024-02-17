@@ -21,5 +21,3 @@ def is_right_triangle(points):
         return True
     else:
         return False
-
-

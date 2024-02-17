@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 from time import sleep as zzz
-from BoyScout.triangle import is_right_triangle
+from triangle import is_right_triangle
 
 # initialize the camera 
 # If you have multiple camera connected with  
