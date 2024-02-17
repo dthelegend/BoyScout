@@ -21,3 +21,18 @@ def is_right_triangle(points):
         return True
     else:
         return False
+
+def trianglesShareASide(points1, points2):
+
+    diffs = []
+    for (ax, ay) in points1:
+        diff = 999
+        for (bx, by) in points2:
+            dis = ((ax - bx)**2 + (ay-by)**2)**0.5
+            if dis < diff:
+                diff = dis
+        diffs.append(diff)
+
+    fil = list(filter(lambda x: x < 100, diffs))
+    
+    return len(fil) == 2

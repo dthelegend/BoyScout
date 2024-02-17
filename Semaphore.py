@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 from time import sleep as zzz
-from triangle import is_right_triangle
+from triangle import trianglesShareASide
 
 # initialize the camera 
 # If you have multiple camera connected with  
@@ -129,16 +129,22 @@ def go():
         #red_con_new = filter(lambda x: is_right_triangle(np.vstack(x).squeeze()), red_con_new)
         #yel_con_new = filter(lambda x: is_right_triangle(np.vstack(x).squeeze()), yel_con_new)
 
+        flags = []
+        for yt in yel_con_new:
+            ypoints = np.vstack(yt).squeeze()
+            for rt in red_con_new: 
+                rpoints = np.vstack(yt).squeeze()
+                if trianglesShareASide(ypoints, rpoints):
+                    flags.append((yt, rt))
+                    break 
+
+        
 
         #Get all centroids
-        redCen = [centroid(x) for x in red_con_new]
-        yelCen = [centroid(x) for x in yel_con_new]
+        flagCen = [centroid(x) for x in flags]
 
-        for px,py in redCen:
+        for px,py in flagCen:
             cv2.circle(redim, (px,py), 3, (0, 255, 0), -1)
-
-        for px,py in yelCen:
-            cv2.circle(redim, (px,py), 3, (255, 0, 0), -1)
         
         cv2.imshow("conts", redim)
 
