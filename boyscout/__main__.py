@@ -8,6 +8,9 @@ from time import sleep as zzz
 
 from boyscout.semaphore import letter
 
+TIME_SHARE = 5
+ARDUINO = "/dev/serial/by-id/usb-Arduino__www.arduino.cc__0042_95036303235351909121-if00"
+
 
 class State(IntEnum):
     IDLE = 0
@@ -15,19 +18,17 @@ class State(IntEnum):
     TRANSMITTING = 2
 
 
-def receive(wait=5, time_between_detections=0.5, wilf=None):
-    x = receive_helper([], wait, time_between_detections, wilf)
+def receive(wait=5, time_between_detections=0.5):
+    x = receive_helper([], wait, time_between_detections)
     if x is not None:
         x = x.lower()
     return x
 
 
-def receive_helper(arr, time_remaining, decrement_by, wilf=None):
+def receive_helper(arr, time_remaining, decrement_by):
     x = letter()
-    if x == wilf:
-        return x
-    elif time_remaining <= 0:
-        arr = list(filter(lambda x : x != "-", arr))
+    if time_remaining <= 0:
+        arr = list(filter(lambda y : y != "-", arr))
         if len(arr) == 0:
             return None
         return max(set(arr), key=arr.count)
@@ -38,7 +39,7 @@ def receive_helper(arr, time_remaining, decrement_by, wilf=None):
     return receive_helper(arr, time_remaining - z_time, decrement_by)
 
 
-def send(board, mess, time_between=6):
+def send(board, mess, time_between=TIME_SHARE):
     print("Attempting to send: ", end="")
     for sub_mess in mess.upper():
         print(sub_mess, end="", flush=True)
@@ -56,12 +57,14 @@ class ControlSignal(Enum):
     FEN = "r"
 
 
-def main():
-    global start_found
+def main(is_sus=True):
     x = boyscout.PySFSSConnection()
-    board = serial.Serial("/dev/serial/by-id/usb-Arduino__www.arduino.cc__0042_95036303235351909121-if00", 9600)
+    board = serial.Serial(ARDUINO, 9600)
 
     send(board, input("Flag 1 position > ")[:1] + input("Flag 2 position > ")[:1] + "?")
+
+    if is_sus:
+        zzz(TIME_SHARE)
 
     state = State.IDLE
 
@@ -80,9 +83,9 @@ def main():
                 else:
                     print("Transmitting time")
                     # Send RTT
-                    send(board, ControlSignal.RTT.value, time_between=10)
+                    send(board, ControlSignal.RTT.value)
                     # Wait for RTR from friend
-                    a = receive(wilf=ControlSignal.RTR.value)
+                    a = receive()
                     if a != ControlSignal.RTR.value:
                         # An error state has been reached!
                         # Return to idling
@@ -93,7 +96,7 @@ def main():
                     for in_frame in in_frame_list:
                         mess = ''.join(in_frame)
                         # Send frame
-                        send(board, mess, time_between=7)
+                        send(board, mess)
 
                         # Wait for ack
                         a = receive()
@@ -107,7 +110,8 @@ def main():
                 print("Idling...")
 
                 # look for a single new packet on the line
-                a = receive(wilf=ControlSignal.RTT.value)
+                zzz(TIME_SHARE)
+                a = receive()
                 print("Received", a)
                 # If Keep-alive
                 if a == ControlSignal.KEEP_ALIVE.value:
@@ -124,7 +128,6 @@ def main():
                     # Ignore it lol
                     # Send Keep-alive
                     send(board, ControlSignal.KEEP_ALIVE.value)
-                    zzz(1)
                     # Attempt to transmit
                     state = State.TRANSMITTING
                     continue
@@ -135,7 +138,7 @@ def main():
                 print("Receiving buffer: ", end="", flush=True)
 
                 while True:
-                    sx = receive(wait=7, time_between_detections=1)
+                    sx = receive()
                     if sx == ControlSignal.RTR.value.upper():
                         zzz(random.randint(0, 3))
                         break
