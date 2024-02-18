@@ -136,16 +136,18 @@ def main():
                 start_found=False
                 while True:
                     sx = receive(wait=7, time_between_detections=1)
-                    if sx != "Q" and not start_found:
+                    if sx == ControlSignal.RTR.value.upper():
+                        zzz(random.randint(0, 3))
+                        break
+                    elif sx != "Q" and not start_found:
                         start_found=True
                         continue
-                    if sx is None:
+                    elif sx is None:
                         sx = "A"
                     buffer.append(sx.upper())
                     print(sx, end="", flush=True)
 
-                    if sx == ControlSignal.FEN.value.upper() or sx == ControlSignal.RTR.value.upper():
-                        zzz(random.randint(0, 3))
+                    if sx == ControlSignal.FEN.value.upper():
                         break
                 print()
 
