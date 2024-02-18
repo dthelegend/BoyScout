@@ -143,7 +143,7 @@ def main():
                         print(x, end="", flush=True)
 
                         if x != "Q" or x == ControlSignal.FEN.value.upper() or x == ControlSignal.RTR.value.upper():
-                            zzz(random.randint(3))
+                            zzz(random.randint(0,3))
                             break
                     print()
 
