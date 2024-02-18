@@ -142,7 +142,7 @@ def main():
                         buffer.append(x.upper())
                         print(x, end="", flush=True)
 
-                        if x == ControlSignal.FEN.value.upper() or x == ControlSignal.RTR.value.upper():
+                        if x != "Q" or x == ControlSignal.FEN.value.upper() or x == ControlSignal.RTR.value.upper():
                             zzz(random.randint(3))
                             break
                     print()
