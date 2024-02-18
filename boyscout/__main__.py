@@ -132,15 +132,22 @@ def main():
                 # Receive from camera
                 buffer = []
                 print("Receiving buffer: ", end="", flush=True)
-                while True:
-                    x = receive(wait=7, time_between_detections=1)
-                    if x is None:
-                        x = "A"
-                    buffer.append(x.upper())
-                    print(x, end="", flush=True)
 
-                    if x != "Q" or x == ControlSignal.FEN.value.upper() or x == ControlSignal.RTR.value.upper():
-                        zzz(random.randint(0,3))
+                while True:
+                    sx = receive(wait=7, time_between_detections=1)
+                    if sx == "Q":
+                        buffer.append(sx.upper())
+                        break
+
+                while True:
+                    sx = receive(wait=7, time_between_detections=1)
+                    if sx is None:
+                        sx = "A"
+                    buffer.append(sx.upper())
+                    print(sx, end="", flush=True)
+
+                    if sx == ControlSignal.FEN.value.upper() or sx == ControlSignal.RTR.value.upper():
+                        zzz(random.randint(0, 3))
                         break
                 print()
 
@@ -152,7 +159,6 @@ def main():
                         state = State.IDLE
                 except ValueError:
                     state = State.IDLE
-
 
 
 if __name__ == "__main__":
