@@ -147,12 +147,13 @@ def main():
                             break
                     print()
 
-                    (out_data, frame_no) = boyscout.py_frame_to_bytes(''.join(buffer))
-                    x.write(out_data)
+                    try:
+                        (out_data, frame_no) = boyscout.py_frame_to_bytes(''.join(buffer))
+                        buffer_ultra += out_data
+                    except ValueError:
+                        break
 
-                    buffer_ultra += buffer
-
-                send(board, buffer_ultra)
+                send(board, ''.join(buffer_ultra))
 
 
 if __name__ == "__main__":
