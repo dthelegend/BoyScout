@@ -31,7 +31,8 @@ impl SFSSManager {
             config.packet_information(true);
         });
 
-        Ok(Self(tun::create(&config)?))
+        let d = tun::create(&config)?;
+        Ok(Self(d))
     }
 }
 
