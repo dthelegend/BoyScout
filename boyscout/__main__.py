@@ -38,12 +38,12 @@ def receive_helper(arr, time_remaining, decrement_by, wilf=None):
     return receive_helper(arr, time_remaining - z_time, decrement_by)
 
 
-def send(board, mess):
+def send(board, mess, time_between=6):
     print("Attempting to send: ", end="")
     for sub_mess in mess.upper():
         print(sub_mess, end="", flush=True)
         board.write(bytes(sub_mess, "utf-8"))
-        zzz(5)
+        zzz(time_between)
     print(flush=True)
 
 
@@ -92,7 +92,7 @@ def main():
                     for in_frame in in_frame_list:
                         mess = ''.join(in_frame)
                         # Send frame
-                        send(board, mess)
+                        send(board, mess, time_between=7)
 
                         # Wait for ack
                         a = receive()
@@ -136,7 +136,7 @@ def main():
                     buffer = []
                     print("Receiving buffer: ", end="", flush=True)
                     while True:
-                        x = receive(wait=5,time_between_detections=0.5)
+                        x = receive(wait=7,time_between_detections=1)
                         if x is None:
                             x = "A"
                         buffer.append(x.upper())
