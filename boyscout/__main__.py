@@ -1,3 +1,5 @@
+import random
+
 import fire
 import boyscout
 import serial
@@ -140,7 +142,8 @@ def main():
                         buffer.append(x.upper())
                         print(x, end="", flush=True)
 
-                        if x == ControlSignal.FEN.value.upper():
+                        if x == ControlSignal.FEN.value.upper() or x == ControlSignal.RTR.value.upper():
+                            zzz(random.randint(3))
                             break
                     print()
 
