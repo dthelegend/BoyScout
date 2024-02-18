@@ -129,31 +129,30 @@ def main():
                     continue
 
             case State.RECEIVING:
-                # Receive from camera and then
-                buffer_ultra = []
-                frame_no = 255
-                while frame_no > 0:
-                    buffer = []
-                    print("Receiving buffer: ", end="", flush=True)
-                    while True:
-                        x = receive(wait=7,time_between_detections=1)
-                        if x is None:
-                            x = "A"
-                        buffer.append(x.upper())
-                        print(x, end="", flush=True)
+                # Receive from camera
+                buffer = []
+                print("Receiving buffer: ", end="", flush=True)
+                while True:
+                    x = receive(wait=7, time_between_detections=1)
+                    if x is None:
+                        x = "A"
+                    buffer.append(x.upper())
+                    print(x, end="", flush=True)
 
-                        if x != "Q" or x == ControlSignal.FEN.value.upper() or x == ControlSignal.RTR.value.upper():
-                            zzz(random.randint(0,3))
-                            break
-                    print()
+                    if x != "Q" or x == ControlSignal.FEN.value.upper() or x == ControlSignal.RTR.value.upper():
+                        zzz(random.randint(0,3))
+                        break
+                print()
 
-                    try:
-                        (out_data, frame_no) = boyscout.py_frame_to_bytes(''.join(buffer))
-                        buffer_ultra += out_data
-                    except ValueError:
-                        frame_no = 0
+                try:
+                    (out_data, frame_no) = boyscout.py_frame_to_bytes(''.join(buffer))
+                    x.write(out_data)
 
-                send(board, ''.join(buffer_ultra))
+                    if frame_no == 0:
+                        state = State.IDLE
+                except ValueError:
+                    state = State.IDLE
+
 
 
 if __name__ == "__main__":
