@@ -13,17 +13,18 @@ class State(IntEnum):
     TRANSMITTING = 2
 
 
-def receive():
-    return receive_helper(5, 1.8)
+def receive(time_between_detections=0.5, wilf=None):
+    return receive_helper(5, time_between_detections, wilf)
 
 
-def receive_helper(time_remaining, decrement_by):
+def receive_helper(time_remaining, decrement_by, wilf=None):
     x = letter()
-    if time_remaining <= 0:
+    if time_remaining <= 0 or x == wilf:
         return x
     z_time = min(decrement_by, time_remaining)
     zzz(z_time)
     y = letter()
+
     if x == y:
         return x.lower()
     else:
@@ -63,7 +64,6 @@ def main():
                 print("Transmitting...")
                 # Receive frames indiscriminately
                 in_bytes = x.read_n(255)
-                print("WOW")
                 in_frame_list = boyscout.py_bytes_to_frames(in_bytes)
 
                 # Nothing to send
