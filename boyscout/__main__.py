@@ -14,21 +14,20 @@ class State(IntEnum):
 
 
 def receive(wait=5, time_between_detections=0.5, wilf=None):
-    return receive_helper(wait, time_between_detections, wilf).lower()
+    return receive_helper([], wait, time_between_detections, wilf).lower()
 
 
-def receive_helper(time_remaining, decrement_by, wilf=None):
+def receive_helper(arr, time_remaining, decrement_by, wilf=None):
     x = letter()
-    if time_remaining <= 0 or x == wilf:
+    if x == wilf:
         return x
+    elif time_remaining <= 0:
+        return max(set(arr), key=arr.count)
+    arr.append(x)
     z_time = min(decrement_by, time_remaining)
     zzz(z_time)
-    y = letter()
 
-    if x == y:
-        return x
-    else:
-        return receive_helper(time_remaining - z_time, decrement_by)
+    return receive_helper(arr, time_remaining - z_time, decrement_by)
 
 
 def send(board, mess):

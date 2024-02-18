@@ -8,7 +8,7 @@ from boyscout.alphabet import getLetter
 # If you have multiple camera connected with  
 # current device, assign a value in cam_port  
 # variable according to that 
-cam_port = 5
+cam_port = 4
 cam = cv2.VideoCapture(cam_port) 
   
 def centroid(contour):
