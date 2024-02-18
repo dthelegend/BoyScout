@@ -22,6 +22,9 @@ def receive_helper(arr, time_remaining, decrement_by, wilf=None):
     if x == wilf:
         return x
     elif time_remaining <= 0:
+        arr = list(filter(lambda x : x != "-", arr))
+        if len(arr) == 0:
+            return None
         return max(set(arr), key=arr.count)
     arr.append(x)
     z_time = min(decrement_by, time_remaining)
