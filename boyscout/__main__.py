@@ -147,7 +147,7 @@ def main():
                             break
                     print()
 
-                    (out_data, frame_no) = boyscout.py_frame_to_bytes(buffer)
+                    (out_data, frame_no) = boyscout.py_frame_to_bytes(''.join(buffer))
                     x.write(out_data)
 
                     buffer_ultra += buffer
