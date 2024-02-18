@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-from boyscout.triangle import trianglesShareASide, lineAngle
+from boyscout.triangle import trianglesShareASide
 import math
 from boyscout.alphabet import getLetter
 
@@ -8,7 +8,7 @@ from boyscout.alphabet import getLetter
 # If you have multiple camera connected with  
 # current device, assign a value in cam_port  
 # variable according to that 
-cam_port = 0
+cam_port = 5
 cam = cv2.VideoCapture(cam_port) 
   
 def centroid(contour):

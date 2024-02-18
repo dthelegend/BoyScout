@@ -13,12 +13,15 @@ class State(IntEnum):
 
 
 def receive():
-    # letter()
-    return ControlSignal.KEEP_ALIVE
+    print("Getting letter...")
+    x = letter()
+    print("Received:", x)
+    return x
+    # return ControlSignal.KEEP_ALIVE
 
 
 def send(s):
-    pass
+    print("Attempting to send:", s)
 
 
 class ControlSignal(Enum):
@@ -37,13 +40,16 @@ def main():
     while True:
         match state:
             case State.TRANSMITTING:
+                print("Transmitting...")
                 # Receive frames indiscriminately
                 in_frame_list = boyscout.py_bytes_to_frames(x.read_n(255))
 
                 # Nothing to send
                 if len(in_frame_list) == 0:
+                    print("Nothing to transmit")
                     state = State.IDLE
                 else:
+                    print("Transmitting time")
                     # Send RTT
                     send(ControlSignal.RTT)
                     # Wait for RTR from friend
@@ -57,7 +63,6 @@ def main():
 
                     for in_frame in in_frame_list:
                         mess = ''.join(in_frame)
-                        print(mess)
                         # Send frame
                         send(mess)
 
@@ -70,19 +75,15 @@ def main():
                     state = State.IDLE
 
             case State.IDLE:
-                # Must send a keep-alive
+                print("Idling...")
 
                 # look for a single new packet on the line
                 a = receive()
                 # If Keep-alive
                 if a == ControlSignal.KEEP_ALIVE:
-                    # Send Keep-alive
-                    send(ControlSignal.KEEP_ALIVE)
-                    print("Idling...")
-                    zzz(5)
-                    # Attempt to transmit
-                    state = State.TRANSMITTING
-
+                    # Here's where the timout logic would be
+                    # IF WE HAD ANY!
+                    pass
                 # If RTT
                 elif a == ControlSignal.RTT:
                     # Send RTR
@@ -91,9 +92,15 @@ def main():
                 else:
                     # Else an error state has been reached!
                     # Ignore it lol
+                    # Send Keep-alive
+                    send(ControlSignal.KEEP_ALIVE)
+                    zzz(1)
+                    # Attempt to transmit
+                    state = State.TRANSMITTING
                     continue
 
             case State.RECEIVING:
+                print("Receiving...")
                 # Receive from camera and then
                 buffer_ultra = []
                 frame_no = 255
@@ -112,6 +119,7 @@ def main():
                     buffer_ultra += buffer
 
                 send(buffer_ultra)
+
 
 if __name__ == "__main__":
     fire.Fire(main)

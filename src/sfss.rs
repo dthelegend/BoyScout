@@ -1,4 +1,4 @@
-use std::io::{BufRead, BufReader, BufWriter, Read, Write};
+use std::io::{Read, Write};
 use tun::platform::Device;
 
 pub struct SFSSManager(Device);
