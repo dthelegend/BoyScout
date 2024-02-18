@@ -130,10 +130,10 @@ def main():
                     print("Receiving buffer: ", end="", flush=True)
                     while True:
                         x = receive(wait=5,time_between_detections=5)
-                        buffer.append(x)
+                        buffer.append(x.upper())
                         print(x, end="", flush=True)
 
-                        if x == ControlSignal.FEN.value:
+                        if x == ControlSignal.FEN.value.upper():
                             break
                     print()
 
