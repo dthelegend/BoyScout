@@ -134,7 +134,7 @@ def main():
                     buffer = []
                     print("Receiving buffer: ", end="", flush=True)
                     while True:
-                        x = receive(wait=5,time_between_detections=5)
+                        x = receive(wait=5,time_between_detections=0.5)
                         if x is None:
                             x = "A"
                         buffer.append(x.upper())
