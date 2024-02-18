@@ -51,8 +51,7 @@ class ControlSignal(Enum):
 
 def main():
     x = boyscout.PySFSSConnection()
-
-    board = serial.Serial("/dev/serial/by-id/usb-Arduino__www.arduino.cc__0042_95036303235351909121-if00", 9600)
+    board = serial.Serial("/dev/serial/by-id/usb-Arduino__www.arduino.cc__0042_950333130313511022F0-if00", 9600)
 
     send(board, input("Flag 1 position > ")[:1] + input("Flag 2 position > ")[:1] + "?")
 
