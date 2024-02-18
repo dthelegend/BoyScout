@@ -1,15 +1,14 @@
 import cv2
 import numpy as np
-from time import sleep as zzz
-from triangle import trianglesShareASide, lineAngle
+from boyscout.triangle import trianglesShareASide, lineAngle
 import math
-from alphabet import getLetter
+from boyscout.alphabet import getLetter
 
 # initialize the camera 
 # If you have multiple camera connected with  
 # current device, assign a value in cam_port  
 # variable according to that 
-cam_port = 1
+cam_port = 0
 cam = cv2.VideoCapture(cam_port) 
   
 def centroid(contour):
@@ -305,10 +304,12 @@ def letter():
         print("No image detected. Please! try again")
         return "-"
 
-while True:
-    go()
 
-    if cv2.waitKey(1) & 0xFF == ord('q'): 
-        break
+if __name__ == "__main__":
+    while True:
+        go()
 
-cv2.destoyAllWindows()
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
+    cv2.destoyAllWindows()

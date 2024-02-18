@@ -1,7 +1,8 @@
 use std::io::{Read, Write};
-use pyo3::exceptions::PyIOError;
+use pyo3::exceptions::{PyIOError, PyValueError};
 use pyo3::prelude::*;
 use pyo3::types::PyBytes;
+use regex::Regex;
 use crate::ChecksumType::CcittCrc16;
 use crate::FrameProtocol::IPv4;
 use crate::sfss::SFSSManager;
@@ -61,7 +62,29 @@ fn sfs_from_u4(x: u8) -> char {
         0x0D => 'N',
         0x0E => 'O',
         0x0F => 'P',
-        _ => panic!("No!")
+        _ => unreachable!()
+    }
+}
+
+fn u4_to_sfs(x: char) -> u8 {
+    match x {
+        'A' => 0x00,
+        'B' => 0x01,
+        'C' => 0x02,
+        'D' => 0x03,
+        'E' => 0x04,
+        'F' => 0x05,
+        'G' => 0x06,
+        'H' => 0x07,
+        'I' => 0x08,
+        'J' => 0x09,
+        'K' => 0x0A,
+        'L' => 0x0B,
+        'M' => 0x0C,
+        'N' => 0x0D,
+        'O' => 0x0E,
+        'P' => 0x0F,
+        _ => unreachable!()
     }
 }
 
@@ -101,9 +124,9 @@ impl Frame {
 }
 
 #[pyfunction]
-fn py_bytes_to_frames(bytes: Vec<u8>) -> Vec<char> {
+fn py_bytes_to_frames(bytes: Vec<u8>) -> Vec<Vec<char>> {
     let data_sections = bytes.chunks(255);
-    data_sections.into_iter().enumerate().flat_map(|(i, x)| {
+    data_sections.into_iter().enumerate().map(|(i, x)| {
         Frame {
             protocol: IPv4,
             checksum_type: CcittCrc16,
@@ -112,6 +135,51 @@ fn py_bytes_to_frames(bytes: Vec<u8>) -> Vec<char> {
             checksum: 0xFFFF
         }.to_sfs()
     }).collect()
+}
+
+#[pyfunction]
+fn py_frame_to_bytes(frame_array: String, py: Python) -> PyResult<(PyObject, u8)> {
+    let re = Regex::new(r"Q(?P<proto>[A-P])(?P<cksum_typ>[A-P])(?P<frame_no>[A-P][A-P])(?P<data>[A-PST]*)(?P<cksum>[A-P][A-P][A-P][A-P])R").unwrap();
+
+    let caps = re.captures(&frame_array).ok_or_else(|| PyErr::new::<PyValueError,_>("Failed to parse frame"))?;
+
+    let data = &caps["data"];
+    let frame_number_vec : Vec<char> = caps["frame_no"].chars().collect();
+    let frame_number : u8 = match frame_number_vec[..] {
+        [a,b] => (u4_to_sfs(a) << 4) | u4_to_sfs(b),
+        _ => unreachable!()
+    };
+
+    let mut buffer = Vec::new();
+    for character in data.chars() {
+        match character {
+            'A' => buffer.push(0x00),
+            'B' => buffer.push(0x01),
+            'C' => buffer.push(0x02),
+            'D' => buffer.push(0x03),
+            'E' => buffer.push(0x04),
+            'F' => buffer.push(0x05),
+            'G' => buffer.push(0x06),
+            'H' => buffer.push(0x07),
+            'I' => buffer.push(0x08),
+            'J' => buffer.push(0x09),
+            'K' => buffer.push(0x0A),
+            'L' => buffer.push(0x0B),
+            'M' => buffer.push(0x0C),
+            'N' => buffer.push(0x0D),
+            'O' => buffer.push(0x0E),
+            'P' => buffer.push(0x0F),
+            'S' => { buffer.pop(); },
+            'R' => { buffer.clear(); },
+            _ => unreachable!()
+        };
+    }
+    buffer = buffer.chunks(2).map(|x| match x {
+        [upper, lower] => (upper << 4) | lower,
+        _ => unreachable!()
+    }).collect();
+
+    Ok((PyBytes::new(py, &buffer).into(), frame_number))
 }
 
 #[pymethods]
@@ -144,5 +212,6 @@ impl PySFSSConnection {
 fn boyscout(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<PySFSSConnection>()?;
     m.add_function(wrap_pyfunction!(py_bytes_to_frames, m)?)?;
+    m.add_function(wrap_pyfunction!(py_frame_to_bytes, m)?)?;
     Ok(())
 }

@@ -1,4 +1,4 @@
-use std::io::{Read, Write};
+use std::io::{BufRead, BufReader, BufWriter, Read, Write};
 use tun::platform::Device;
 
 pub struct SFSSManager(Device);
@@ -31,7 +31,8 @@ impl SFSSManager {
             config.packet_information(true);
         });
 
-        Ok(Self(tun::create(&config)?))
+        let d = tun::create(&config)?;
+        Ok(Self(d))
     }
 }
 

@@ -12,7 +12,8 @@ classifiers = [
 ]
 dynamic = ["version"]
 dependencies = [
-    "opencv-python"
+    "opencv-python",
+    "fire"
 ]
 
 [tool.maturin]
