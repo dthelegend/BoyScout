@@ -1,4 +1,4 @@
-use std::io::{Read, Write};
+use std::io::{BufRead, Read, Write};
 use pyo3::exceptions::{PyIOError, PyValueError};
 use pyo3::prelude::*;
 use pyo3::types::PyBytes;
@@ -199,7 +199,6 @@ impl PySFSSConnection {
     }
 
     fn write(&mut self, b: Vec<u8>) -> PyResult<usize> {
-
         let amount = self.0.get_writer().write(&b)
             .map_err(|x| PyErr::new::<PyIOError, _>(format!("Could not write to tunnel. Reason: {}", x.kind())))?;
 

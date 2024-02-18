@@ -52,6 +52,7 @@ class ControlSignal(Enum):
 
 def main():
     x = boyscout.PySFSSConnection()
+
     board = serial.Serial("/dev/serial/by-id/usb-Arduino__www.arduino.cc__0042_95036303235351909121-if00", 9600)
 
     send(board, input("Flag 1 position > ")[:1] + input("Flag 2 position > ")[:1] + "?")
@@ -132,10 +133,11 @@ def main():
                     while True:
                         x = receive()
                         buffer.append(x)
-                        print("Receiving buffer: ", end="", flush=True)
+                        print(x, end="", flush=True)
 
                         if x == ControlSignal.FEN.value:
                             break
+                    print()
 
                     (out_data, frame_no) = boyscout.py_frame_to_bytes(buffer)
                     x.write(out_data)
