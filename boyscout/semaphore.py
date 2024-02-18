@@ -65,11 +65,11 @@ def red(rgbimage):
     hsv_image = cv2.cvtColor(blur, cv2.COLOR_BGR2HSV)
 
     # lower boundary RED color range values; Hue (0 - 10)
-    lower1 = np.array([0, 70, 100])
-    upper1 = np.array([10, 255, 255])
+    lower1 = np.array([0, 70, 70])
+    upper1 = np.array([15, 255, 255])
  
     # upper boundary RED color range values; Hue (160 - 180)
-    lower2 = np.array([160,70,100])
+    lower2 = np.array([160,70,70])
     upper2 = np.array([179,255,255])
 
     # Threshold the HSV image to get only yellow color
