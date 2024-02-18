@@ -13,8 +13,8 @@ class State(IntEnum):
     TRANSMITTING = 2
 
 
-def receive(time_between_detections=0.5, wilf=None):
-    return receive_helper(5, time_between_detections, wilf)
+def receive(wait=5, time_between_detections=0.5, wilf=None):
+    return receive_helper(wait, time_between_detections, wilf).lower()
 
 
 def receive_helper(time_remaining, decrement_by, wilf=None):
@@ -26,7 +26,7 @@ def receive_helper(time_remaining, decrement_by, wilf=None):
     y = letter()
 
     if x == y:
-        return x.lower()
+        return x
     else:
         return receive_helper(time_remaining - z_time, decrement_by)
 
@@ -51,7 +51,7 @@ class ControlSignal(Enum):
 
 def main():
     x = boyscout.PySFSSConnection()
-    board = serial.Serial("/dev/serial/by-id/usb-Arduino__www.arduino.cc__0042_950333130313511022F0-if00", 9600)
+    board = serial.Serial("/dev/serial/by-id/usb-Arduino__www.arduino.cc__0042_95036303235351909121-if00", 9600)
 
     send(board, input("Flag 1 position > ")[:1] + input("Flag 2 position > ")[:1] + "?")
 
@@ -100,6 +100,7 @@ def main():
 
                 # look for a single new packet on the line
                 a = receive(wilf=ControlSignal.RTT.value)
+                print("Received", a)
                 # If Keep-alive
                 if a == ControlSignal.KEEP_ALIVE.value:
                     # Here's where the timout logic would be
@@ -128,7 +129,7 @@ def main():
                     buffer = []
                     print("Receiving buffer: ", end="", flush=True)
                     while True:
-                        x = receive()
+                        x = receive(wait=5,time_between_detections=5)
                         buffer.append(x)
                         print(x, end="", flush=True)
 
