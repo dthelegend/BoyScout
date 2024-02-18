@@ -39,12 +39,12 @@ def receive_helper(arr, time_remaining, decrement_by):
     return receive_helper(arr, time_remaining - z_time, decrement_by)
 
 
-def send(board, mess, time_between=TIME_SHARE):
+def send(board, mess, wait_for=TIME_SHARE):
     print("Attempting to send: ", end="")
     for sub_mess in mess.upper():
         print(sub_mess, end="", flush=True)
         board.write(bytes(sub_mess, "utf-8"))
-        zzz(time_between)
+        zzz(wait_for)
     print(flush=True)
 
 
@@ -121,7 +121,7 @@ def main(is_sus=True):
                 # If RTT
                 elif a == ControlSignal.RTT.value:
                     # Send RTR
-                    send(board, ControlSignal.RTR.value)
+                    send(board, ControlSignal.RTR.value, wait_for=0)
                     state = State.RECEIVING
                 else:
                     # Else an error state has been reached!
