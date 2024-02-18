@@ -1,5 +1,6 @@
 import fire
 import boyscout
+import serial
 from enum import IntEnum, Enum
 from time import sleep as zzz
 
@@ -13,15 +14,31 @@ class State(IntEnum):
 
 
 def receive():
+    return receive_helper(5, 1.8)
+
+
+def receive_helper(time_remaining, decrement_by):
     print("Getting letter...")
     x = letter()
     print("Received:", x)
-    return x
-    # return ControlSignal.KEEP_ALIVE
+    if time_remaining <= 0:
+        return x
+    z_time = min(decrement_by, time_remaining)
+    zzz(z_time)
+    y = letter()
+    if x == y:
+        return x.lower()
+    else:
+        return receive(receive_helper - z_time)
 
 
-def send(s):
-    print("Attempting to send:", s)
+def send(board, mess):
+    print("Attempting to send: ", end="")
+    for sub_mess in mess.upper():
+        print(sub_mess, end="", flush=True)
+        board.write(bytes(sub_mess, "utf-8"))
+        zzz(5)
+    print(flush=True)
 
 
 class ControlSignal(Enum):
@@ -35,6 +52,10 @@ class ControlSignal(Enum):
 
 def main():
     x = boyscout.PySFSSConnection()
+    board = serial.Serial("/dev/serial/by-id/usb-Arduino__www.arduino.cc__0042_95036303235351909121-if00", 9600)
+
+    send(board, input("Flag 1 position > ")[:1] + input("Flag 2 position > ")[:1] + "?")
+
     state = State.IDLE
 
     while True:
@@ -42,7 +63,9 @@ def main():
             case State.TRANSMITTING:
                 print("Transmitting...")
                 # Receive frames indiscriminately
-                in_frame_list = boyscout.py_bytes_to_frames(x.read_n(255))
+                in_bytes = x.read_n(255)
+                print("WOW")
+                in_frame_list = boyscout.py_bytes_to_frames(in_bytes)
 
                 # Nothing to send
                 if len(in_frame_list) == 0:
@@ -51,10 +74,10 @@ def main():
                 else:
                     print("Transmitting time")
                     # Send RTT
-                    send(ControlSignal.RTT)
+                    send(board, ControlSignal.RTT.value)
                     # Wait for RTR from friend
                     a = receive()
-                    if a != ControlSignal.RTR:
+                    if a != ControlSignal.RTR.value:
                         # An error state has been reached!
                         # Return to idling
                         print("Error when attempting to send")
@@ -64,11 +87,11 @@ def main():
                     for in_frame in in_frame_list:
                         mess = ''.join(in_frame)
                         # Send frame
-                        send(mess)
+                        send(board, mess)
 
                         # Wait for ack
                         a = receive()
-                        if a != ControlSignal.ACK:
+                        if a != ControlSignal.ACK.value:
                             break
 
                     # Return to idling after send
@@ -80,37 +103,38 @@ def main():
                 # look for a single new packet on the line
                 a = receive()
                 # If Keep-alive
-                if a == ControlSignal.KEEP_ALIVE:
+                if a == ControlSignal.KEEP_ALIVE.value:
                     # Here's where the timout logic would be
                     # IF WE HAD ANY!
                     pass
                 # If RTT
-                elif a == ControlSignal.RTT:
+                elif a == ControlSignal.RTT.value:
                     # Send RTR
-                    send(ControlSignal.RTR)
+                    send(board, ControlSignal.RTR.value)
                     state = State.RECEIVING
                 else:
                     # Else an error state has been reached!
                     # Ignore it lol
                     # Send Keep-alive
-                    send(ControlSignal.KEEP_ALIVE)
+                    send(board, ControlSignal.KEEP_ALIVE.value)
                     zzz(1)
                     # Attempt to transmit
                     state = State.TRANSMITTING
                     continue
 
             case State.RECEIVING:
-                print("Receiving...")
                 # Receive from camera and then
                 buffer_ultra = []
                 frame_no = 255
                 while frame_no > 0:
                     buffer = []
+                    print("Receiving buffer: ", end="", flush=True)
                     while True:
-                        x = letter()
+                        x = receive()
                         buffer.append(x)
+                        print("Receiving buffer: ", end="", flush=True)
 
-                        if x == ControlSignal.FEN:
+                        if x == ControlSignal.FEN.value:
                             break
 
                     (out_data, frame_no) = boyscout.py_frame_to_bytes(buffer)
@@ -118,7 +142,7 @@ def main():
 
                     buffer_ultra += buffer
 
-                send(buffer_ultra)
+                send(board, buffer_ultra)
 
 
 if __name__ == "__main__":

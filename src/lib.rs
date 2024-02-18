@@ -192,7 +192,7 @@ impl PySFSSConnection {
     fn read_n(&mut self, n: usize, py: Python) -> PyResult<PyObject> {
         let mut buf = vec![0u8; n];
 
-        let amount = self.0.read(&mut buf)
+        let amount = self.0.get_reader().read(&mut buf)
             .map_err(|x| PyErr::new::<PyIOError, _>(format!("Could not read tunnel. Reason: {}", x.kind())))?;
 
         Ok(PyBytes::new(py, &buf[0..amount]).into())
@@ -200,7 +200,7 @@ impl PySFSSConnection {
 
     fn write(&mut self, b: Vec<u8>) -> PyResult<usize> {
 
-        let amount = self.0.write(&b)
+        let amount = self.0.get_writer().write(&b)
             .map_err(|x| PyErr::new::<PyIOError, _>(format!("Could not write to tunnel. Reason: {}", x.kind())))?;
 
         Ok(amount)

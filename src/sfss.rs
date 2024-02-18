@@ -1,7 +1,7 @@
-use std::io::{Read, Write};
-use tun::platform::Device;
+use std::io::{BufReader, BufWriter};
+use tun::platform::posix::{Reader, Writer};
 
-pub struct SFSSManager(Device);
+pub struct SFSSManager(BufReader<Reader>, BufWriter<Writer>);
 
 impl SFSSManager {
     pub fn new() -> Result<Self, tun::Error> {
@@ -31,23 +31,17 @@ impl SFSSManager {
             config.packet_information(true);
         });
 
-        let d = tun::create(&config)?;
-        Ok(Self(d))
+        let (d_read, d_write) = tun::create(&config)?.split();
+        Ok(Self(BufReader::new(d_read), BufWriter::new(d_write)))
     }
 }
 
-impl Read for SFSSManager {
-    fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> {
-        self.0.read(buf)
-    }
-}
-
-impl Write for SFSSManager {
-    fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
-        self.0.write(buf)
+impl <'a> SFSSManager {
+    pub fn get_reader(&'a mut self) -> &'a mut BufReader<Reader> {
+        &mut self.0
     }
 
-    fn flush(&mut self) -> std::io::Result<()> {
-        self.0.flush()
+    pub fn get_writer(&'a mut self) -> &'a mut BufWriter<Writer> {
+        &mut self.1
     }
 }
