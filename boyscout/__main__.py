@@ -79,7 +79,7 @@ def main():
                 else:
                     print("Transmitting time")
                     # Send RTT
-                    send(board, ControlSignal.RTT.value)
+                    send(board, ControlSignal.RTT.value, time_between=10)
                     # Wait for RTR from friend
                     a = receive(wilf=ControlSignal.RTR.value)
                     if a != ControlSignal.RTR.value:
