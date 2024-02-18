@@ -133,14 +133,12 @@ def main():
                 buffer = []
                 print("Receiving buffer: ", end="", flush=True)
 
+                start_found=False
                 while True:
                     sx = receive(wait=7, time_between_detections=1)
-                    if sx == "Q":
-                        buffer.append(sx.upper())
-                        break
-
-                while True:
-                    sx = receive(wait=7, time_between_detections=1)
+                    if sx != "Q" and not start_found:
+                        start_found=True
+                        continue
                     if sx is None:
                         sx = "A"
                     buffer.append(sx.upper())
