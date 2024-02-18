@@ -75,7 +75,7 @@ def main():
                     # Send RTT
                     send(board, ControlSignal.RTT.value)
                     # Wait for RTR from friend
-                    a = receive()
+                    a = receive(wilf=ControlSignal.RTR.value)
                     if a != ControlSignal.RTR.value:
                         # An error state has been reached!
                         # Return to idling
@@ -100,7 +100,7 @@ def main():
                 print("Idling...")
 
                 # look for a single new packet on the line
-                a = receive()
+                a = receive(wilf=ControlSignal.RTT.value)
                 # If Keep-alive
                 if a == ControlSignal.KEEP_ALIVE.value:
                     # Here's where the timout logic would be
