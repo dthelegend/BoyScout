@@ -151,7 +151,7 @@ def main():
                         (out_data, frame_no) = boyscout.py_frame_to_bytes(''.join(buffer))
                         buffer_ultra += out_data
                     except ValueError:
-                        break
+                        frame_no = 0
 
                 send(board, ''.join(buffer_ultra))
 
