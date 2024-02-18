@@ -29,7 +29,7 @@ def receive_helper(time_remaining, decrement_by):
     if x == y:
         return x.lower()
     else:
-        return receive(receive_helper - z_time)
+        return receive_helper(time_remaining - z_time, decrement_by)
 
 
 def send(board, mess):
