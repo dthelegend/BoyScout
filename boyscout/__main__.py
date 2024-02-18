@@ -18,9 +18,7 @@ def receive():
 
 
 def receive_helper(time_remaining, decrement_by):
-    print("Getting letter...")
     x = letter()
-    print("Received:", x)
     if time_remaining <= 0:
         return x
     z_time = min(decrement_by, time_remaining)
