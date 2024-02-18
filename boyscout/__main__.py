@@ -14,7 +14,10 @@ class State(IntEnum):
 
 
 def receive(wait=5, time_between_detections=0.5, wilf=None):
-    return receive_helper([], wait, time_between_detections, wilf).lower()
+    x = receive_helper([], wait, time_between_detections, wilf)
+    if x is not None:
+        x = x.lower()
+    return x
 
 
 def receive_helper(arr, time_remaining, decrement_by, wilf=None):
