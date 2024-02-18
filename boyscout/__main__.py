@@ -57,6 +57,7 @@ class ControlSignal(Enum):
 
 
 def main():
+    global start_found
     x = boyscout.PySFSSConnection()
     board = serial.Serial("/dev/serial/by-id/usb-Arduino__www.arduino.cc__0042_95036303235351909121-if00", 9600)
 
@@ -133,19 +134,15 @@ def main():
                 buffer = []
                 print("Receiving buffer: ", end="", flush=True)
 
-                start_found=False
                 while True:
                     sx = receive(wait=7, time_between_detections=1)
                     if sx == ControlSignal.RTR.value.upper():
                         zzz(random.randint(0, 3))
                         break
-                    elif sx != "Q" and not start_found:
-                        start_found=True
-                        continue
                     elif sx is None:
                         sx = "A"
                     buffer.append(sx.upper())
-                    print(sx, end="", flush=True)
+                    print(sx.upper(), end="", flush=True)
 
                     if sx == ControlSignal.FEN.value.upper():
                         break
